@@ -1,14 +1,12 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
-
 import 'yolo_utils.dart';
 
-/// Raw YUV420 camera frame (plain data, safe to send to an isolate).
 class YuvFrame {
-  final int width, height; // raw sensor-orientation size
+  final int width, height; 
   final Uint8List y, u, v;
   final int yRowStride, uvRowStride, uvPixelStride;
-  final int rotation; // clockwise degrees needed to make the frame upright
+  final int rotation; 
   const YuvFrame({
     required this.width,
     required this.height,
@@ -23,20 +21,16 @@ class YuvFrame {
 }
 
 class Preprocessed {
-  final Float32List tensor; // [640*640*3] NHWC, RGB, 0..1
+  final Float32List tensor; 
   final Letterbox letterbox;
   const Preprocessed(this.tensor, this.letterbox);
 }
 
-const double _pad = 114 / 255; // Ultralytics letterbox grey
-
-/// YUV420 -> rotate upright -> letterbox 640x640 -> RGB float32 (0..1).
-/// Done in ONE pass with nearest-neighbour sampling, so it is fast enough
-/// for real time (no intermediate bitmaps).
+const double _pad = 114 / 255; 
 Preprocessed preprocessYuv(YuvFrame f, int size) {
   final rot = ((f.rotation % 360) + 360) % 360;
   final swap = rot == 90 || rot == 270;
-  final uw = swap ? f.height : f.width; // upright size
+  final uw = swap ? f.height : f.width; 
   final uh = swap ? f.width : f.height;
   final lb = Letterbox(uw, uh, size);
   final out = Float32List(size * size * 3)..fillRange(0, size * size * 3, _pad);
@@ -46,8 +40,6 @@ Preprocessed preprocessYuv(YuvFrame f, int size) {
     final uy = math.min(uh - 1, ((oy - lb.padY) * inv).floor());
     for (var ox = lb.padX; ox < lb.padX + lb.newW; ox++) {
       final ux = math.min(uw - 1, ((ox - lb.padX) * inv).floor());
-
-      // upright (ux,uy) -> raw sensor (x,y)
       int x, y;
       if (rot == 90) {
         x = uy;
@@ -81,8 +73,6 @@ Preprocessed preprocessYuv(YuvFrame f, int size) {
   return Preprocessed(out, lb);
 }
 
-/// Packed RGB(A) bytes (already upright) -> letterbox -> float32.
-/// Used for captured still images.
 Preprocessed preprocessRgb(
     Uint8List rgb, int w, int h, int channels, int size) {
   final lb = Letterbox(w, h, size);

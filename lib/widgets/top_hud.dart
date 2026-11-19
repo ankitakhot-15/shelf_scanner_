@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../controllers/camera_ctrl.dart';
 import '../controllers/detection_ctrl.dart';
 import '../models/detection.dart';
 import 'detection_painter.dart';
 import 'stat_chip.dart';
 
-/// Top bar over the camera: back, FPS, counts, toggles.
 class TopHud extends StatelessWidget {
   const TopHud({super.key});
 

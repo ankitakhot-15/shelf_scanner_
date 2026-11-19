@@ -19,8 +19,8 @@ class Detection {
 
 class FrameResult {
   final List<Detection>? shelves;
-  final List<Detection> items; // products + empty gaps
-  final int imageWidth; // upright size
+  final List<Detection> items; 
+  final int imageWidth; 
   final int imageHeight;
   final int totalMs;
   const FrameResult({

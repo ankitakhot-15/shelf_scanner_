@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'controllers/detection_ctrl.dart';
 import 'screens/home_screen.dart';
 import 'services/detection_service.dart';
@@ -23,7 +22,6 @@ class ShelfScannerApp extends StatelessWidget {
         colorSchemeSeed: Colors.teal,
         brightness: Brightness.dark,
       ),
-      // App-wide controller: lives for the whole app, loads the AI models once.
       initialBinding: BindingsBuilder(() {
         Get.put(DetectionCtrl(DetectionService()), permanent: true);
       }),

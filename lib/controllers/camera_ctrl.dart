@@ -68,7 +68,7 @@ class CameraCtrl extends GetxController with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused) {
-      releaseCamera(); // free the camera when the app goes to background
+      releaseCamera(); 
     } else if (state == AppLifecycleState.resumed) {
       start();
     }
@@ -95,8 +95,8 @@ class CameraCtrl extends GetxController with WidgetsBindingObserver {
       );
       final c = CameraController(
         back,
-        ResolutionPreset.medium, // ~720x480: enough for a 640 model and fast
-        enableAudio: true, // needed for video; asks microphone permission
+        ResolutionPreset.medium, 
+        enableAudio: true, 
         imageFormatGroup: ImageFormatGroup.yuv420,
       );
       await c.initialize();
@@ -122,15 +122,11 @@ class CameraCtrl extends GetxController with WidgetsBindingObserver {
     cameraController = null;
     status.value = CameraStatus.idle;
     isRecording.value = false;
-    // Let the UI stop showing the preview before the controller is disposed.
     await Future<void>.delayed(const Duration(milliseconds: 50));
     try {
       await c?.dispose();
     } catch (_) {}
   }
-
-  // ───── image stream (feeds the AI) ─────
-
   int _rotationFor() {
     final c = cameraController;
     return cameraFrameRotation(
@@ -164,8 +160,6 @@ class CameraCtrl extends GetxController with WidgetsBindingObserver {
   void cycleRotation() =>
       rotationOffset.value = (rotationOffset.value + 90) % 360;
 
-  // ───── controls ─────
-
   void setMode(CaptureMode m) {
     if (isRecording.value || mode.value == m) return;
     mode.value = m;
@@ -183,16 +177,14 @@ class CameraCtrl extends GetxController with WidgetsBindingObserver {
     await c.setFlashMode(next);
     flashMode.value = next;
   }
-
-  /// The big shutter button: photo, or start/stop recording.
   Future<void> onShutter() async {
     if (mode.value == CaptureMode.photo) {
       final file = await capturePhoto();
       if (file == null) return;
       Get.find<DetectionCtrl>().clearStill();
       await Get.to(
-          () => ReviewScreen(photo: file)); // waits until user goes back
-      await startStream(); // Retake -> live again
+          () => ReviewScreen(photo: file)); 
+      await startStream(); 
     } else if (isRecording.value) {
       final path = await stopRecording();
       if (path == null) {
@@ -238,8 +230,6 @@ class CameraCtrl extends GetxController with WidgetsBindingObserver {
     errorMessage.value = null;
     try {
       await stopStream();
-      // Avoid requesting simultaneous video and image-analysis streams,
-      // which is unsupported on some CameraX devices.
       await c.startVideoRecording();
       Get.find<DetectionCtrl>().clearLiveResults();
       isRecording.value = true;
@@ -289,8 +279,6 @@ class CameraCtrl extends GetxController with WidgetsBindingObserver {
         return error.description ?? error.code;
     }
   }
-
-  /// Stops recording, copies the file to app storage, returns its path.
   Future<String?> stopRecording() async {
     final c = cameraController;
     if (c == null || !c.value.isRecordingVideo || _recordingCommandInProgress) {

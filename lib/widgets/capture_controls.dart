@@ -1,10 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../controllers/camera_ctrl.dart';
-
-/// Bottom controls: mode switch, flash, shutter / record button.
 class CaptureControls extends StatelessWidget {
   const CaptureControls({super.key});
 
@@ -82,7 +79,7 @@ class CaptureControls extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 48), // keeps the shutter centred
+            const SizedBox(width: 48), 
           ]),
         ]);
       }),

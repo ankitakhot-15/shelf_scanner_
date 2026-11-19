@@ -1,9 +1,5 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
-
-/// Maps between the original (upright) image and the 640x640 model input
-/// using "letterbox" resizing (keep aspect ratio, pad with grey) - the same
-/// thing Ultralytics does during training/inference.
 class Letterbox {
   final int srcW, srcH, size;
   late final double scale;
@@ -17,8 +13,6 @@ class Letterbox {
     padY = (size - newH) ~/ 2;
   }
 }
-
-/// A candidate box in model-input pixels (0..640).
 class RawBox {
   double x1, y1, x2, y2;
   final double score;
@@ -28,7 +22,6 @@ class RawBox {
   double get area => math.max(0, x2 - x1) * math.max(0, y2 - y1);
 }
 
-/// Converts an RGB image tensor from NHWC to NCHW.
 Float32List rgbNhwcToNchw(Float32List input, int size) {
   final planeSize = size * size;
   if (input.length != planeSize * 3) {
@@ -44,16 +37,6 @@ Float32List rgbNhwcToNchw(Float32List input, int size) {
   }
   return output;
 }
-
-/// Decodes a YOLO11 head output.
-///
-/// Layout is either [1, C, N] (channels first, usual for TFLite exports) or
-/// [1, N, C]; it is detected from [shape].  C = 4 (cx,cy,w,h) + numClasses
-/// (+ 32 mask coefficients for the -seg model).  YOLO11 has NO objectness
-/// column: the score is simply the best class score.
-///
-/// Some exports give box coordinates normalised (0..1), others in pixels
-/// (0..640).  We detect which one and convert to pixels.
 List<RawBox> decodeYolo(
   Float32List out,
   List<int> shape, {
@@ -94,8 +77,6 @@ List<RawBox> decodeYolo(
     maxCoord = math.max(maxCoord, math.max(math.max(cx, cy), math.max(w, h)));
     res.add(RawBox(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2, best, cls));
   }
-
-  // Normalised output (all values <= ~1) -> scale up to pixels.
   if (res.isNotEmpty && maxCoord <= 2.0) {
     final s = inputSize.toDouble();
     for (final b in res) {
@@ -116,7 +97,6 @@ double _iou(RawBox a, RawBox b) {
   return union <= 0 ? 0 : inter / union;
 }
 
-/// Class-aware non-maximum suppression.
 List<RawBox> nms(List<RawBox> boxes, double iouThreshold, {int maxDet = 300}) {
   boxes.sort((a, b) => b.score.compareTo(a.score));
   final candidates = boxes.length > 1000 ? boxes.sublist(0, 1000) : boxes;

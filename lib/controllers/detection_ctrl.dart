@@ -11,24 +11,17 @@ enum ModelStatus { loading, ready, error }
 class DetectionCtrl extends GetxController {
   DetectionCtrl(this._service);
   final DetectionService _service;
-
-  // ---- model state ----
   final status = ModelStatus.loading.obs;
   final error = RxnString();
-
-  // ---- live detection state ----
   final liveEnabled = true.obs;
   final videoMode = false.obs;
   final showLabels = true.obs;
-  // Rx<List> (not RxList): a NEW list every frame, so the painter repaints.
   final shelves = Rx<List<Detection>>(const []);
   final items = Rx<List<Detection>>(const []);
   final fps = 0.0.obs;
   final inferenceMs = 0.obs;
   int _frameCounter = 0;
   DateTime? _lastResultAt;
-
-  // ---- still image state ----
   final stillResult = Rxn<FrameResult>();
   final stillBusy = false.obs;
   final stillError = RxnString();
@@ -47,7 +40,7 @@ class DetectionCtrl extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadModels(); // start loading while the home screen is visible
+    loadModels(); 
   }
 
   Future<void> loadModels() async {
@@ -82,7 +75,7 @@ class DetectionCtrl extends GetxController {
         final inst =
             1000 / now.difference(_lastResultAt!).inMilliseconds.clamp(1, 5000);
         fps.value =
-            fps.value == 0 ? inst : fps.value * 0.8 + inst * 0.2; // smoothed
+            fps.value == 0 ? inst : fps.value * 0.8 + inst * 0.2; 
       }
       _lastResultAt = now;
     } catch (e) {
@@ -113,9 +106,6 @@ class DetectionCtrl extends GetxController {
   }
 
   void setShowLabels(bool value) => showLabels.value = value;
-
-  // ───── captured photo ─────
-
   void clearStill() {
     stillResult.value = null;
     stillError.value = null;

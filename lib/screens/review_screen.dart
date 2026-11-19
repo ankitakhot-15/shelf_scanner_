@@ -68,7 +68,7 @@ class ReviewScreen extends GetView<DetectionCtrl> {
               return Row(children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: busy ? null : Get.back, // Retake
+                    onPressed: busy ? null : Get.back, 
                     icon: const Icon(Icons.refresh),
                     label: const Text('Retake'),
                   ),

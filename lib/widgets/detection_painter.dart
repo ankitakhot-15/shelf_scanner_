@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-
 import '../models/detection.dart';
-
-/// Draws bounding boxes + "label 87%" tags on top of the camera / photo.
-/// Boxes are normalised (0..1), so this works for any widget size.
 class DetectionPainter extends CustomPainter {
   DetectionPainter(
       {required this.shelves, required this.items, required this.showLabels});
@@ -13,9 +9,9 @@ class DetectionPainter extends CustomPainter {
   final bool showLabels;
 
   static Color colorFor(DetectionKind k) => switch (k) {
-        DetectionKind.shelf => const Color(0xFF29B6F6), // blue
-        DetectionKind.product => const Color(0xFF66BB6A), // green
-        DetectionKind.empty => const Color(0xFFEF5350), // red
+        DetectionKind.shelf => const Color(0xFF29B6F6), 
+        DetectionKind.product => const Color(0xFF66BB6A), 
+        DetectionKind.empty => const Color(0xFFEF5350), 
       };
 
   @override

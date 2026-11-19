@@ -43,8 +43,6 @@ class HomeScreen extends GetView<DetectionCtrl> {
                           child: const Text('Retry')),
                     ]),
                   ModelStatus.ready => FilledButton.icon(
-                      // The binding creates CameraCtrl for this route and
-                      // GetX deletes it when the route is closed.
                       onPressed: () => Get.to(
                         () => const CameraScreen(),
                         binding:

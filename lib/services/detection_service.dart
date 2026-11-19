@@ -9,7 +9,6 @@ import '../core/app_config.dart';
 import '../models/detection.dart';
 import 'frame_preprocessor.dart';
 import 'yolo_runner.dart';
-
 class WorkerInit {
   final SendPort reply;
   final Uint8List productModel, shelfModel;
@@ -18,9 +17,9 @@ class WorkerInit {
 
 class WorkerJob {
   final int id;
-  final YuvFrame? yuv; // live camera frame ...
-  final String? stillPath; // ... or a captured JPEG
-  final Uint8List? stillBytes; // ... or an extracted video frame
+  final YuvFrame? yuv; 
+  final String? stillPath; 
+  final Uint8List? stillBytes; 
   final bool runShelf;
   const WorkerJob(
       this.id, this.yuv, this.stillPath, this.stillBytes, this.runShelf);
@@ -33,42 +32,31 @@ class WorkerResult {
   const WorkerResult(this.id, this.result, this.error);
 }
 
-// ───────────────────────── worker isolate (heavy work) ────────────────────
-
 void _workerMain(WorkerInit init) {
   final port = ReceivePort();
   late final YoloRunner product;
   late final YoloRunner shelf;
   try {
-    try {
-      product = YoloRunner(
-        init.productModel,
-        numClasses: AppConfig.productClasses,
-        labels: const ['empty space', 'product'],
-        kinds: const [DetectionKind.empty, DetectionKind.product],
-        threads: AppConfig.interpreterThreads,
-      );
-    } catch (e) {
-      throw StateError('Product model initialization failed: $e');
-    }
-    try {
-      shelf = YoloRunner(
-        init.shelfModel,
-        numClasses: AppConfig.shelfClasses,
-        extraChannels: AppConfig.segMaskCoeffs,
-        labels: const ['shelf'],
-        kinds: const [DetectionKind.shelf],
-        threads: AppConfig.interpreterThreads,
-      );
-    } catch (e) {
-      product.close();
-      throw StateError('Shelf model initialization failed: $e');
-    }
+    product = YoloRunner(
+      init.productModel,
+      numClasses: 2,
+      labels: const ['empty', 'product'],
+      kinds: const [DetectionKind.empty, DetectionKind.product],
+      threads: AppConfig.interpreterThreads,
+    );
+    shelf = YoloRunner(
+      init.shelfModel,
+      numClasses: 1,
+      extraChannels: AppConfig.segMaskCoeffs,
+      labels: const ['shelf'],
+      kinds: const [DetectionKind.shelf],
+      threads: AppConfig.interpreterThreads,
+    );
   } catch (e) {
     init.reply.send('Could not load models: $e');
     return;
   }
-  init.reply.send(port.sendPort); // "ready"
+  init.reply.send(port.sendPort); 
 
   port.listen((msg) {
     if (msg is! WorkerJob) return;
@@ -117,11 +105,6 @@ Preprocessed _loadImageBytes(Uint8List bytes) {
   return preprocessRgb(
       rgbBytes, upright.width, upright.height, channels, AppConfig.inputSize);
 }
-
-// ───────────────────────── facade used by the app ─────────────────────────
-
-/// Owns the worker isolate. All inference happens off the UI thread, so the
-/// camera preview stays smooth.
 class DetectionService {
   Isolate? _isolate;
   ReceivePort? _fromWorker;
@@ -162,15 +145,11 @@ class DetectionService {
     final d = await rootBundle.load(path);
     return d.buffer.asUint8List(d.offsetInBytes, d.lengthInBytes);
   }
-
-  /// Returns null when the worker is still busy (frame is dropped - this is
-  /// what keeps the camera smooth when inference is slower than the camera).
   Future<FrameResult?> detectFrame(CameraImage image, int rotation,
       {required bool runShelf}) async {
     if (_busy || _toWorker == null || image.planes.length != 3) return null;
     _busy = true;
     try {
-      // Copy bytes NOW: CameraImage buffers are reused after this callback.
       final frame = YuvFrame(
         width: image.width,
         height: image.height,
@@ -187,8 +166,6 @@ class DetectionService {
       _busy = false;
     }
   }
-
-  /// Full detection (products + shelves) on a captured photo.
   Future<FrameResult> detectStill(String path) async {
     while (_busy) {
       await Future.delayed(const Duration(milliseconds: 30));
