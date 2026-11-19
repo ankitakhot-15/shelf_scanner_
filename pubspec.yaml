@@ -1,0 +1,29 @@
+name: shelf_scanner
+description: Supermarket shelf and product detection using Flutter and YOLO11 TFLite models.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  camera: ^0.11.0          # live preview, photo, video, image stream
+  tflite_flutter: ^0.12.1  # runs the .tflite models
+  get: ^4.7.2              # GetX: state management + navigation + snackbars
+  image: ^4.2.0            # decode captured JPEGs (still-image processing)
+  path_provider: ^2.1.4    # where to save recorded videos
+  path: ^1.9.0
+  video_player: ^2.11.1    # read recorded video duration
+  video_thumbnail: ^0.5.6  # extract video frames for model inference
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/models/
